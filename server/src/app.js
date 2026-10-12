@@ -39,11 +39,11 @@ function createApp({ db, allowedOrigins = [] }) {
   }));
   // Page + API are served from the same origin, so CORS only matters for other origins (e.g. a future separate site).
   app.use(cors({ origin: (origin, cb) => cb(null, !origin || allowedOrigins.includes(origin)) }));
-  app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: '5m', index: 'index.html' }));
+  app.use(express.static(path.join(__dirname, '..', 'public'), { index: 'index.html', setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache') }));
   app.use(express.json({ limit: '20kb' }));
   app.use(rateLimit({ windowMs: 60_000, limit: 120, standardHeaders: true, legacyHeaders: false }));
 
-  app.get('/health', (_req, res) => res.json({ ok: true, configured: Boolean(db) }));
+  app.get('/health', (_req, res) => res.json({ ok: true, configured: Boolean(db), version: require('../package.json').version }));
 
   // Printable table QR (SVG). Points to the public menu: <origin>/?r=<slug>&t=<table>
   app.get('/qr/:slug/:table.svg', async (req, res) => {
