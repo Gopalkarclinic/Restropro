@@ -1,0 +1,9 @@
+body{font-family:system-ui,sans-serif;margin:0;padding:16px;color:#2a1a14}
+.tools{max-width:720px;margin:0 auto 16px}
+button{padding:12px 20px;font-size:16px;border:0;border-radius:10px;background:#6B1E1E;color:#fff;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;max-width:900px;margin:0 auto}
+.card{border:2px solid #6B1E1E;border-radius:14px;padding:12px;text-align:center;break-inside:avoid}
+.card img{width:100%;height:auto;display:block}
+.card b{display:block;font-size:22px;margin-top:6px;color:#6B1E1E}
+.card span{font-size:13px}
+@media print{.tools{display:none}body{padding:0}.grid{grid-template-columns:repeat(2,1fr)}}

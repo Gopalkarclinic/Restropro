@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const QRCode = require('qrcode');
 const { z } = require('zod');
 
 const orderSchema = z.object({
@@ -43,6 +44,15 @@ function createApp({ db, allowedOrigins = [] }) {
   app.use(rateLimit({ windowMs: 60_000, limit: 120, standardHeaders: true, legacyHeaders: false }));
 
   app.get('/health', (_req, res) => res.json({ ok: true, configured: Boolean(db) }));
+
+  // Printable table QR (SVG). Points to the public menu: <origin>/?r=<slug>&t=<table>
+  app.get('/qr/:slug/:table.svg', async (req, res) => {
+    const { slug, table } = req.params;
+    if (!/^[a-z0-9-]{3,40}$/.test(slug) || !/^[A-Za-z0-9-]{1,10}$/.test(table)) return res.status(400).json({ error: 'invalid_request' });
+    const base = (process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const svg = await QRCode.toString(`${base}/?r=${slug}&t=${encodeURIComponent(table)}`, { type: 'svg', margin: 1, errorCorrectionLevel: 'M' });
+    res.type('image/svg+xml').set('Cache-Control', 'public, max-age=3600').send(svg);
+  });
 
   // Guest places order from QR page. Lands as 'pending_approval' - staff must approve.
   const orderLimiter = rateLimit({ windowMs: 60_000, limit: 10, standardHeaders: true, legacyHeaders: false });

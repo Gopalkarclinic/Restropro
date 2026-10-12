@@ -54,3 +54,11 @@ test('retries once on duplicate-key race', async () => {
   const r = await call(createApp({ db }), 'POST', '/api/public/orders', good);
   assert.equal(r.status, 201); assert.equal(n, 2);
 });
+
+test('QR svg endpoint works and rejects bad input', async () => {
+  const s = createApp({ db: null }).listen(0); const base = `http://127.0.0.1:${s.address().port}`;
+  const ok = await fetch(`${base}/qr/demo-dhaba/4.svg`); const body = await ok.text();
+  const bad = await fetch(`${base}/qr/demo-dhaba/<script>.svg`);
+  s.close();
+  assert.equal(ok.status, 200); assert.ok(body.startsWith('<svg')); assert.equal(bad.status === 400 || bad.status === 404, true);
+});
