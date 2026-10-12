@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 const QRCode = require('qrcode');
 const { z } = require('zod');
+const { staffRouter } = require('./staff');
 
 const orderSchema = z.object({
   restaurantSlug: z.string().regex(/^[a-z0-9-]{3,40}$/),
@@ -83,6 +84,8 @@ function createApp({ db, allowedOrigins = [] }) {
     }
     res.status(201).json({ orderId: data, status: 'pending_approval' });
   });
+
+  app.use('/api/staff', staffRouter(db));
 
   // Guest checks the status of their own order. The id is an unguessable UUID; only the status is returned.
   app.get('/api/public/orders/:id', async (req, res) => {

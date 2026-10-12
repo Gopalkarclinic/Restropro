@@ -70,3 +70,37 @@ test('guest can read only the status of an order', async () => {
   const bad = await call(createApp({ db }), 'GET', '/api/public/orders/not-a-uuid');
   assert.equal(bad.status, 400);
 });
+
+// ---- staff accounts (owner only) ----
+function staffDb({ role = 'owner', userOk = true, createErr = null, insertErr = null } = {}) {
+  const calls = { deleted: [], created: [] };
+  const db = {
+    calls,
+    auth: { getUser: async () => (userOk ? { data: { user: { id: 'u-owner' } }, error: null } : { data: null, error: { message: 'bad' } }),
+      admin: { createUser: async (x) => { calls.created.push(x); return createErr ? { data: null, error: createErr } : { data: { user: { id: 'u-new' } }, error: null }; },
+        deleteUser: async (id) => { calls.deleted.push(id); return {}; }, updateUserById: async () => ({ error: null }) } },
+    from: () => { const q = { select: () => q, eq: () => q, maybeSingle: async () => ({ data: role ? { restaurant_id: 'r1', role, user_id: 'u-x' } : null }), insert: async () => ({ error: insertErr }) }; return q; },
+  };
+  return db;
+}
+const post = async (app, path, body, token = 't') => {
+  const s = app.listen(0);
+  const r = await fetch(`http://127.0.0.1:${s.address().port}${path}`, { method: 'POST', headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify(body) });
+  const j = await r.json(); s.close(); return { status: r.status, j };
+};
+const newStaff = { email: 'a@b.in', password: 'longenough1', role: 'captain', displayName: 'Ravi' };
+test('owner can create staff', async () => {
+  const db = staffDb(); const r = await post(createApp({ db }), '/api/staff', newStaff);
+  assert.equal(r.status, 201); assert.equal(db.calls.created.length, 1);
+});
+test('no token -> 401, non-owner -> 403, bad input -> 400', async () => {
+  assert.equal((await post(createApp({ db: staffDb() }), '/api/staff', newStaff, null)).status, 401);
+  assert.equal((await post(createApp({ db: staffDb({ role: null }) }), '/api/staff', newStaff)).status, 403);
+  assert.equal((await post(createApp({ db: staffDb() }), '/api/staff', { ...newStaff, role: 'owner' })).status, 400);
+  assert.equal((await post(createApp({ db: staffDb() }), '/api/staff', { ...newStaff, password: 'short' })).status, 400);
+});
+test('duplicate email -> 409; failed link removes the new login', async () => {
+  assert.equal((await post(createApp({ db: staffDb({ createErr: { message: 'User already registered' } }) }), '/api/staff', newStaff)).status, 409);
+  const db = staffDb({ insertErr: { message: 'x' } });
+  assert.equal((await post(createApp({ db }), '/api/staff', newStaff)).status, 500); assert.deepEqual(db.calls.deleted, ['u-new']);
+});

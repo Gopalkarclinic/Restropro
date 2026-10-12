@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6B1E1E">
+<title>Restropro Staff</title>
+<link rel="stylesheet" href="staff.css">
+</head>
+<body>
+<section id="login" hidden>
+  <form id="lf">
+    <h1>Restropro</h1>
+    <p>Staff login</p>
+    <label>Email<input id="em" type="email" autocomplete="username" required></label>
+    <label>Password<input id="pw" type="password" autocomplete="current-password" required></label>
+    <p id="lerr" class="err"></p>
+    <button type="submit" id="lbtn" class="primary">Login</button>
+  </form>
+</section>
+
+<div id="app" hidden>
+  <header>
+    <div><b id="rname">Restropro</b> <span id="role" class="badge"></span></div>
+    <div class="right">
+      <span id="queue" class="badge warn" hidden></span>
+      <span id="net" class="badge" hidden>Offline</span>
+      <a id="dashlink" href="dashboard.html" hidden>Dashboard</a>
+      <button id="out" class="ghost">Logout</button>
+    </div>
+  </header>
+  <nav id="tabs"></nav>
+  <main>
+    <section id="v-orders"></section>
+    <section id="v-new" hidden></section>
+    <section id="v-menu" hidden></section>
+    <section id="v-staff" hidden></section>
+  </main>
+</div>
+<div id="toast" hidden></div>
+<dialog id="dlg"><div id="dlg-body"></div></dialog>
+<script src="/vendor/supabase.js"></script>
+<script src="config.js"></script>
+<script src="staff.js"></script>
+</body>
+</html>
