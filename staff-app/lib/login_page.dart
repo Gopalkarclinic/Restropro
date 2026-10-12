@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'strings.dart';
+import 'widgets.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,16 +16,26 @@ class _LoginPageState extends State<LoginPage> {
   String? _error;
 
   Future<void> _login() async {
-    setState(() { _busy = true; _error = null; });
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
     try {
       await Supabase.instance.client.auth.signInWithPassword(email: _email.text.trim(), password: _pass.text);
     } on AuthException {
-      setState(() => _error = 'Email ya password galat hai');
+      if (mounted) setState(() => _error = t('bad_login'));
     } catch (_) {
-      setState(() => _error = 'Internet check karo, phir try karo');
+      if (mounted) setState(() => _error = t('check_net'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _pass.dispose();
+    super.dispose();
   }
 
   @override
@@ -37,16 +49,29 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.all(24),
               shrinkWrap: true,
               children: [
+                const Align(alignment: Alignment.centerRight, child: LanguageButton(dark: true)),
                 const Text('Restropro', style: TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: Color(0xFF6B1E1E))),
                 const SizedBox(height: 4),
-                const Text('Staff login'),
+                Text(t('staff_login')),
                 const SizedBox(height: 32),
-                TextField(controller: _email, keyboardType: TextInputType.emailAddress, autofillHints: const [AutofillHints.email], decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder())),
+                TextField(
+                  controller: _email,
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
+                  decoration: InputDecoration(labelText: t('email'), border: const OutlineInputBorder()),
+                ),
                 const SizedBox(height: 16),
-                TextField(controller: _pass, obscureText: true, autofillHints: const [AutofillHints.password], onSubmitted: (_) => _login(), decoration: const InputDecoration(labelText: 'Password', border: OutlineInputBorder())),
-                if (_error != null) Padding(padding: const EdgeInsets.only(top: 12), child: Text(_error!, style: const TextStyle(color: Colors.red))),
+                TextField(
+                  controller: _pass,
+                  obscureText: true,
+                  autofillHints: const [AutofillHints.password],
+                  onSubmitted: (_) => _login(),
+                  decoration: InputDecoration(labelText: t('password'), border: const OutlineInputBorder()),
+                ),
+                if (_error != null)
+                  Padding(padding: const EdgeInsets.only(top: 12), child: Text(_error!, style: const TextStyle(color: Colors.red))),
                 const SizedBox(height: 24),
-                FilledButton(onPressed: _busy ? null : _login, child: Text(_busy ? 'Ruko...' : 'Login')),
+                FilledButton(onPressed: _busy ? null : _login, child: Text(_busy ? t('wait') : t('login'))),
               ],
             ),
           ),
