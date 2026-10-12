@@ -7,6 +7,6 @@
    - `SUPABASE_SERVICE_ROLE_KEY` = Supabase -> Project Settings -> API -> service_role (SECRET, only here)
    - `ALLOWED_ORIGINS` = the customer page origin, e.g. https://menu.yourdomain.com
    - `NODE_ENV` = production
-4. Deploy. Open `https://<your-domain>/health` -> should show `{"ok":true}`.
+4. Deploy. Open `https://<your-domain>/health` -> `{"ok":true,"configured":true}`. If configured is false, an environment variable is missing/wrong.
 5. Put that domain in `customer-web/config.js` as `API_BASE`, push, redeploy customer-web.
 6. Every push to `main` redeploys automatically. Never commit `.env`.

@@ -1,6 +1,6 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import { createApp } from './app.js';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { createApp } = require('./app');
 
 const fakeDb = (result) => ({ rpc: async () => result });
 const call = async (app, method, path, body) => {
@@ -26,4 +26,11 @@ test('creates order as pending_approval', async () => {
 test('unavailable item -> 422', async () => {
   const r = await call(createApp({ db: fakeDb({ data: null, error: { message: 'item_unavailable' } }) }), 'POST', '/api/public/orders', good);
   assert.equal(r.status, 422);
+});
+test('no db configured -> 503, health says configured false', async () => {
+  const app = createApp({ db: null });
+  const h = await call(app, 'GET', '/health');
+  assert.equal(h.j.configured, false);
+  const r = await call(app, 'POST', '/api/public/orders', good);
+  assert.equal(r.status, 503);
 });

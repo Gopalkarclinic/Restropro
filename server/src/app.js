@@ -1,8 +1,9 @@
-import express from 'express';
-import helmet from 'helmet';
-import cors from 'cors';
-import rateLimit from 'express-rate-limit';
-import { z } from 'zod';
+'use strict';
+const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const { z } = require('zod');
 
 const orderSchema = z.object({
   restaurantSlug: z.string().regex(/^[a-z0-9-]{3,40}$/),
@@ -16,7 +17,7 @@ const orderSchema = z.object({
 });
 
 // `db` is a supabase client (service_role) - injected so tests can fake it.
-export function createApp({ db, allowedOrigins = [] }) {
+function createApp({ db, allowedOrigins = [] }) {
   const app = express();
   app.set('trust proxy', 1); // behind Hostinger proxy
   app.disable('x-powered-by');
@@ -27,7 +28,7 @@ export function createApp({ db, allowedOrigins = [] }) {
   app.use(express.json({ limit: '20kb' }));
   app.use(rateLimit({ windowMs: 60_000, limit: 120, standardHeaders: true, legacyHeaders: false }));
 
-  app.get('/health', (_req, res) => res.json({ ok: true }));
+  app.get('/health', (_req, res) => res.json({ ok: true, configured: Boolean(db) }));
 
   // Guest places order from QR page. Lands as 'pending_approval' - staff must approve.
   const orderLimiter = rateLimit({ windowMs: 60_000, limit: 10, standardHeaders: true, legacyHeaders: false });
@@ -35,6 +36,7 @@ export function createApp({ db, allowedOrigins = [] }) {
     const p = orderSchema.safeParse(req.body);
     if (!p.success) return res.status(400).json({ error: 'invalid_request' });
     const { restaurantSlug, tableNo, idempotencyKey, items } = p.data;
+    if (!db) return res.status(503).json({ error: 'server_not_configured' });
     const { data, error } = await db.rpc('create_qr_order', {
       p_slug: restaurantSlug, p_table_no: tableNo, p_idempotency_key: idempotencyKey,
       p_items: items.map(i => ({ menu_item_id: i.menuItemId, qty: i.qty, note: i.note })),
@@ -54,3 +56,5 @@ export function createApp({ db, allowedOrigins = [] }) {
   app.use((err, _req, res, _next) => { console.error('unhandled', err.message); res.status(500).json({ error: 'server_error' }); });
   return app;
 }
+
+module.exports = { createApp };
