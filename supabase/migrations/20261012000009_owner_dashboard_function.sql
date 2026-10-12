@@ -1,0 +1,3 @@
+-- Owner/manager dashboard numbers (sales, GST, orders, kitchen time, hourly sales, top dishes) in one call.
+-- Only owner/manager of that restaurant may call it; everyone else gets 'not_allowed'.
+-- (Applied on the project as "owner_dashboard_function"; see the function body in the database.)

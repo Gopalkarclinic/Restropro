@@ -31,7 +31,7 @@ function createApp({ db, allowedOrigins = [] }) {
         scriptSrc: ["'self'"],
         styleSrc: ["'self'"],
         imgSrc: ["'self'", 'data:'],
-        connectSrc: ["'self'", supa],
+        connectSrc: ["'self'", supa, supa.replace('https://', 'wss://')],
         frameAncestors: ["'none'"],
         objectSrc: ["'none'"],
       },
@@ -44,6 +44,12 @@ function createApp({ db, allowedOrigins = [] }) {
   app.use(rateLimit({ windowMs: 60_000, limit: 120, standardHeaders: true, legacyHeaders: false }));
 
   app.get('/health', (_req, res) => res.json({ ok: true, configured: Boolean(db), version: require('../package.json').version }));
+
+  // Browser build of supabase-js (login + live updates for the dashboard), served from our own server.
+  app.get('/vendor/supabase.js', (_req, res) => {
+    res.set('Cache-Control', 'public, max-age=86400').type('application/javascript')
+      .sendFile(require.resolve('@supabase/supabase-js/dist/umd/supabase.js'));
+  });
 
   // Printable table QR (SVG). Points to the public menu: <origin>/?r=<slug>&t=<table>
   app.get('/qr/:slug/:table.svg', async (req, res) => {
