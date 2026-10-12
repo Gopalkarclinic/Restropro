@@ -3,6 +3,7 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 const { z } = require('zod');
 
 const orderSchema = z.object({
@@ -21,10 +22,23 @@ function createApp({ db, allowedOrigins = [] }) {
   const app = express();
   app.set('trust proxy', 1); // behind Hostinger proxy
   app.disable('x-powered-by');
-  app.use(helmet());
-  app.use(cors({
-    origin: (origin, cb) => (!origin || allowedOrigins.includes(origin)) ? cb(null, true) : cb(new Error('CORS blocked')),
+  const supa = (process.env.SUPABASE_URL || 'https://*.supabase.co');
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'", supa],
+        frameAncestors: ["'none'"],
+        objectSrc: ["'none'"],
+      },
+    },
   }));
+  // Page + API are served from the same origin, so CORS only matters for other origins (e.g. a future separate site).
+  app.use(cors({ origin: (origin, cb) => cb(null, !origin || allowedOrigins.includes(origin)) }));
+  app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: '5m', index: 'index.html' }));
   app.use(express.json({ limit: '20kb' }));
   app.use(rateLimit({ windowMs: 60_000, limit: 120, standardHeaders: true, legacyHeaders: false }));
 
@@ -37,10 +51,13 @@ function createApp({ db, allowedOrigins = [] }) {
     if (!p.success) return res.status(400).json({ error: 'invalid_request' });
     const { restaurantSlug, tableNo, idempotencyKey, items } = p.data;
     if (!db) return res.status(503).json({ error: 'server_not_configured' });
-    const { data, error } = await db.rpc('create_qr_order', {
+    const args = {
       p_slug: restaurantSlug, p_table_no: tableNo, p_idempotency_key: idempotencyKey,
       p_items: items.map(i => ({ menu_item_id: i.menuItemId, qty: i.qty, note: i.note })),
-    });
+    };
+    let { data, error } = await db.rpc('create_qr_order', args);
+    // Two identical requests at the same instant: the loser hits a unique violation; retrying returns the winner's order.
+    if (error && error.code === '23505') ({ data, error } = await db.rpc('create_qr_order', args));
     if (error) {
       const known = ['restaurant_not_found', 'item_unavailable', 'invalid_items', 'invalid_qty'];
       const code = known.find(k => error.message?.includes(k));
@@ -53,7 +70,11 @@ function createApp({ db, allowedOrigins = [] }) {
 
   app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
   // eslint-disable-next-line no-unused-vars
-  app.use((err, _req, res, _next) => { console.error('unhandled', err.message); res.status(500).json({ error: 'server_error' }); });
+  app.use((err, _req, res, _next) => {
+    if (err.type === 'entity.parse.failed' || err.type === 'entity.too.large') return res.status(400).json({ error: 'invalid_request' });
+    console.error('unhandled', err.message);
+    res.status(500).json({ error: 'server_error' });
+  });
   return app;
 }
 

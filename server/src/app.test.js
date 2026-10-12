@@ -34,3 +34,23 @@ test('no db configured -> 503, health says configured false', async () => {
   const r = await call(app, 'POST', '/api/public/orders', good);
   assert.equal(r.status, 503);
 });
+
+test('bad JSON -> 400, not 500', async () => {
+  const app = createApp({ db: fakeDb({}) });
+  const s = app.listen(0);
+  const r = await fetch(`http://127.0.0.1:${s.address().port}/api/public/orders`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{bad' });
+  s.close(); assert.equal(r.status, 400);
+});
+test('serves customer page with CSP', async () => {
+  const s = createApp({ db: null }).listen(0);
+  const r = await fetch(`http://127.0.0.1:${s.address().port}/`);
+  const html = await r.text(); s.close();
+  assert.equal(r.status, 200); assert.ok(html.includes('app.js'));
+  assert.ok(r.headers.get('content-security-policy').includes("script-src 'self'"));
+});
+test('retries once on duplicate-key race', async () => {
+  let n = 0;
+  const db = { rpc: async () => (++n === 1 ? { data: null, error: { code: '23505', message: 'dup' } } : { data: 'oid', error: null }) };
+  const r = await call(createApp({ db }), 'POST', '/api/public/orders', good);
+  assert.equal(r.status, 201); assert.equal(n, 2);
+});

@@ -1,40 +1,3 @@
-<!doctype html>
-<html lang="mr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#6B1E1E">
-<link rel="manifest" href="manifest.webmanifest">
-<title>Menu</title>
-<style>
-:root{--maroon:#6B1E1E;--haldi:#E0A100;--cream:#FFF8EC;--ink:#2a1a14}
-*{box-sizing:border-box}
-body{margin:0;background:var(--cream);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans Devanagari",Roboto,sans-serif;padding-bottom:96px}
-header{background:var(--maroon);color:#fff;padding:20px 16px 16px}
-header h1{margin:0;font-size:24px}
-header p{margin:4px 0 0;opacity:.85}
-main{padding:12px;max-width:560px;margin:0 auto}
-.item{display:flex;align-items:center;gap:12px;background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.item.off{opacity:.45}
-.info{flex:1}.name{font-size:18px;font-weight:600}.price{color:var(--maroon);font-weight:700;margin-top:2px}
-.qty{display:flex;align-items:center;gap:10px}
-button{font:inherit;border:0;cursor:pointer}
-.qty button{width:44px;height:44px;border-radius:12px;background:var(--haldi);font-size:22px;font-weight:700;color:var(--ink)}
-.qty span{min-width:20px;text-align:center;font-size:18px;font-weight:700}
-.bar{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--cream);border-top:1px solid #e8dcc4}
-.bar button{width:100%;height:56px;border-radius:14px;background:var(--maroon);color:#fff;font-size:18px;font-weight:700}
-.bar button:disabled{background:#b9a;opacity:.7}
-.msg{text-align:center;padding:48px 20px;font-size:18px}
-.ok{background:#fff;border-radius:16px;padding:24px;text-align:center;margin-top:24px}
-.ok h2{margin:0 0 8px;color:var(--maroon)}
-</style>
-</head>
-<body>
-<header><h1 id="rname">Menu</h1><p id="tinfo"></p></header>
-<main id="app"><div class="msg">Menu load ho raha hai...</div></main>
-<div class="bar" id="bar" hidden><button id="send" disabled>Order bhejo</button></div>
-<script src="config.js"></script>
-<script>
 (function(){
   var C = window.RESTROPRO, q = new URLSearchParams(location.search);
   var slug = (q.get('r')||'').toLowerCase(), table = (q.get('t')||'').slice(0,10);
@@ -102,6 +65,3 @@ button{font:inherit;border:0;cursor:pointer}
     });
   };
 })();
-</script>
-</body>
-</html>

@@ -3,7 +3,7 @@
 Restaurant ordering + billing system (Maharashtra first). One shared multi-tenant codebase.
 
 ## Folders
-- `customer-web/` - QR menu + ordering for guests (Flutter Web)
+- `server/public/` - QR menu page for guests (plain HTML/JS, served by the Node server)
 - `staff-app/` - owner / captain / kitchen app (Flutter)
 - `server/` - Node.js API (Hostinger): QR orders, later payments, webhooks, emails
 - `supabase/migrations/` - database schema (run in order)

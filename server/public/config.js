@@ -2,5 +2,5 @@
 window.RESTROPRO = {
   SUPABASE_URL: 'https://eurxcepvxjpigbbbczyz.supabase.co',
   SUPABASE_KEY: 'sb_publishable_6KxxE3c112Vc0KvJNQ79ZA_XWZxPq56',
-  API_BASE: 'http://localhost:3000', // change to the Hostinger server URL after deploy
+  API_BASE: '', // same server serves page + API (no CORS needed)
 };
