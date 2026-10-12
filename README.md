@@ -5,7 +5,7 @@ Restaurant ordering + billing system (Maharashtra first). One shared multi-tenan
 ## Folders
 - `customer-web/` - QR menu + ordering for guests (Flutter Web)
 - `staff-app/` - owner / captain / kitchen app (Flutter)
-- `src/` (repo root) - Node.js API (Hostinger): QR orders, later payments, webhooks, emails
+- `server/` - Node.js API (Hostinger): QR orders, later payments, webhooks, emails
 - `supabase/migrations/` - database schema (run in order)
 - `supabase/seed.sql` - 2 demo restaurants (dev only)
 - `supabase/tests/` - security tests (tenant isolation)

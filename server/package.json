@@ -1,13 +1,14 @@
 {
-  "name": "restropro",
+  "name": "restropro-server",
   "version": "0.1.0",
   "private": true,
-  "main": "src/index.js",
-  "engines": { "node": ">=20 <25" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node src/index.js",
-    "build": "echo \"no build step needed\"",
-    "test": "node --test"
+    "test": "node --test",
+    "build": "echo \"no build step needed\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

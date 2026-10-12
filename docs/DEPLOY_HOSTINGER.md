@@ -1,7 +1,7 @@
 # Deploy server on Hostinger (Business plan)
 
 1. hPanel -> Websites -> Create Website -> **Web App** -> Import Git Repository -> authorize GitHub -> choose `Restropro`, branch `main`.
-2. Framework: Express / Other. Entry file: `src/index.js` (or `index.js`). Node version: 22.x (20+ ok).
+2. Build settings: **Root directory = `server`**, Entry file = `src/index.js`, Node 22.x, build command `npm run build`.
 3. Environment Variables (hPanel):
    - `SUPABASE_URL` = https://eurxcepvxjpigbbbczyz.supabase.co
    - `SUPABASE_SERVICE_ROLE_KEY` = Supabase -> Project Settings -> API -> service_role (SECRET, only here)
