@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f1b24">
+<title>Restropro Admin</title>
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<section id="login" hidden>
+  <div class="lwrap">
+    <aside class="lside"><div class="brand big"><i>R</i>Restropro</div><h2>Restaurant ka poora control, ek jagah.</h2><p>Live orders, bikri, menu aur staff — sab real-time.</p></aside>
+    <form id="lf">
+      <h1>Admin login</h1><p class="muted">Owner / Manager ke liye</p>
+      <label>Email<input id="em" type="email" autocomplete="username" required></label>
+      <label>Password<input id="pw" type="password" autocomplete="current-password" required></label>
+      <p id="lerr" class="err"></p>
+      <button class="btn pri" type="submit" id="lbtn">Login</button>
+    </form>
+  </div>
+</section>
+
+<div id="shell" hidden>
+  <aside id="side">
+    <div class="brand"><i>R</i><span id="rname">Restropro</span></div>
+    <nav id="nav"></nav>
+    <div class="sidefoot"><a href="/staff.html" target="_blank" rel="noopener">Staff app kholo ↗</a><button id="out" class="link">Logout</button></div>
+  </aside>
+  <div id="content">
+    <header class="top">
+      <button id="burger" class="icon" aria-label="menu">☰</button>
+      <h1 id="title">Overview</h1>
+      <span class="live" id="live"><i></i>LIVE</span>
+      <div class="grow"></div>
+      <div class="seg" id="range"><button data-d="1" class="on">Aaj</button><button data-d="7">7 din</button><button data-d="30">30 din</button></div>
+    </header>
+    <main>
+      <section id="v-overview">
+        <div class="kpis" id="kpis"></div>
+        <div class="cols">
+          <div class="card wide"><div class="ch"><h3>Ghante ke hisaab se bikri</h3><span class="muted" id="peak"></span></div><div id="chart"></div></div>
+          <div class="card"><div class="ch"><h3>Top dishes</h3></div><ol class="rank" id="top"></ol></div>
+        </div>
+        <div class="card"><div class="ch"><h3>Abhi chal rahe orders</h3><span class="chip" id="activeN">0</span></div><div class="live-grid" id="liveBoard"></div></div>
+      </section>
+
+      <section id="v-orders" hidden>
+        <div class="toolbar"><div class="seg" id="ofilter"></div></div>
+        <div class="card flush"><div class="tw"><table><thead><tr><th>Time</th><th>Table</th><th>Items</th><th>Source</th><th>Status</th></tr></thead><tbody id="otbody"></tbody></table></div></div>
+      </section>
+
+      <section id="v-menu" hidden>
+        <div class="toolbar"><input id="msearch" placeholder="Dish khojein..." class="search"><select id="mcat"></select><div class="grow"></div><button class="btn pri" id="madd">+ Naya item</button></div>
+        <div class="card flush"><div class="tw"><table><thead><tr><th></th><th>Dish</th><th>Category</th><th class="r">Kimat</th><th>Available</th><th></th></tr></thead><tbody id="mtbody"></tbody></table></div></div>
+      </section>
+
+      <section id="v-tables" hidden>
+        <div class="card"><div class="ch"><h3>Tables aur QR</h3></div>
+          <div class="row2"><label>Kitne tables hain<input id="tcount" type="number" min="1" max="200"></label><button class="btn pri" id="tsave">Save</button><a class="btn" id="tprint" target="_blank" rel="noopener">QR sheet print karo</a></div>
+          <p class="muted">Har table ka QR alag hai. Print karke table pe chipka dein — customer scan karke seedha apna order bhejega.</p>
+        </div>
+        <div class="tgrid" id="tgrid"></div>
+      </section>
+
+      <section id="v-staff" hidden>
+        <div class="toolbar"><div class="grow"></div><button class="btn pri" id="sadd">+ Naya staff</button></div>
+        <div class="card flush"><div class="tw"><table><thead><tr><th>Naam</th><th>Role</th><th></th></tr></thead><tbody id="stbody"></tbody></table></div></div>
+      </section>
+
+      <section id="v-settings" hidden>
+        <div class="card narrow"><div class="ch"><h3>Restaurant ki details</h3></div>
+          <label>Naam<input id="s-name" maxlength="120"></label>
+          <label>Phone<input id="s-phone" maxlength="20" inputmode="tel"></label>
+          <label>Address<input id="s-addr" maxlength="200"></label>
+          <label>GST type<select id="s-gst"><option value="composition">Composition (GST nahi)</option><option value="regular_5">Regular 5% (CGST 2.5% + SGST 2.5%)</option><option value="specified_18">18% (CGST 9% + SGST 9%)</option></select></label>
+          <p class="muted">GST badalne se sirf nayi bills pe asar hoga.</p>
+          <button class="btn pri" id="s-save">Save karo</button>
+        </div>
+        <div class="card narrow"><div class="ch"><h3>Apna password badlein</h3></div>
+          <label>Naya password (8+ akshar)<input id="s-pw" type="password" autocomplete="new-password"></label>
+          <button class="btn" id="s-pwb">Password badlo</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<div id="scrim" hidden></div>
+<dialog id="dlg"><div id="dlg-body"></div></dialog>
+<div id="toast" hidden></div>
+<script src="/vendor/supabase.js"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

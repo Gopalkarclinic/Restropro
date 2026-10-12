@@ -31,7 +31,7 @@ function createApp({ db, allowedOrigins = [] }) {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:'],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
         connectSrc: ["'self'", supa, supa.replace('https://', 'wss://')],
         frameAncestors: ["'none'"],
         objectSrc: ["'none'"],

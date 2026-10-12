@@ -11,7 +11,7 @@
   if(!/^[a-z0-9-]{3,40}$/.test(slug) || !table){ msg('QR code sahi nahi hai. Waiter ko bulayein.'); return; }
   document.getElementById('tinfo').textContent = 'Table ' + table;
 
-  fetch(C.SUPABASE_URL + '/rest/v1/menu_items?select=id,name,price_paise,is_available,restaurants!inner(name,slug)&restaurants.slug=eq.' + encodeURIComponent(slug) + '&order=name',
+  fetch(C.SUPABASE_URL + '/rest/v1/menu_items?select=id,name,price_paise,is_available,category,description,image_url,is_veg,restaurants!inner(name,slug)&restaurants.slug=eq.' + encodeURIComponent(slug) + '&order=category,name',
     { headers: { apikey: C.SUPABASE_KEY } })
   .then(function(r){ if(!r.ok) throw 0; return r.json(); })
   .then(function(rows){
@@ -23,10 +23,13 @@
   }).catch(function(){ msg('Menu load nahi hua. Internet check karein.'); });
 
   function render(){
-    var list = document.createDocumentFragment();
+    var list = document.createDocumentFragment(), lastCat = null;
     items.forEach(function(it){
+      if(it.category !== lastCat){ lastCat = it.category; list.append(el('h2','cat',lastCat)); }
       var row = el('div','item' + (it.is_available ? '' : ' off'));
-      var info = el('div','info'); info.append(el('div','name',it.name), el('div','price', it.is_available ? rupees(it.price_paise) : 'Abhi khatam'));
+      if(it.image_url){ var im = el('img','pic'); im.src = it.image_url; im.alt = ''; im.loading = 'lazy'; im.onerror = function(){ im.remove(); }; row.append(im); }
+      var info = el('div','info'), nm = el('div','name'); nm.append(el('span','veg' + (it.is_veg === false ? ' nv' : '')), document.createTextNode(it.name));
+      info.append(nm); if(it.description) info.append(el('div','desc',it.description)); info.append(el('div','price', it.is_available ? rupees(it.price_paise) : 'Abhi khatam'));
       row.append(info);
       if(it.is_available){
         var qty = el('div','qty'), minus = el('button',null,'−'), n = el('span',null,String(cart[it.id]||0)), plus = el('button',null,'+');

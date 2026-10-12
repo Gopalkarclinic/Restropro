@@ -18,3 +18,11 @@ button{font:inherit;border:0;cursor:pointer}
 .msg{text-align:center;padding:48px 20px;font-size:18px}
 .ok{background:#fff;border-radius:16px;padding:24px;text-align:center;margin-top:24px}
 .ok h2{margin:0 0 8px;color:var(--maroon)}
+
+.cat{font-size:15px;color:var(--maroon);margin:18px 4px 8px;text-transform:uppercase;letter-spacing:.05em}
+.pic{width:64px;height:64px;border-radius:12px;object-fit:cover;flex:none;background:#f0e6d6}
+.desc{font-size:13px;color:#6b5a50;margin-top:2px}
+.veg{display:inline-block;width:12px;height:12px;border:2px solid #1f8a4c;border-radius:3px;position:relative;margin-right:8px;vertical-align:0}
+.veg:after{content:"";position:absolute;inset:2px;border-radius:50%;background:#1f8a4c}
+.veg.nv{border-color:#c62828}.veg.nv:after{background:#c62828}
+.name{font-size:17px}
