@@ -62,3 +62,11 @@ test('QR svg endpoint works and rejects bad input', async () => {
   s.close();
   assert.equal(ok.status, 200); assert.ok(body.startsWith('<svg')); assert.equal(bad.status === 400 || bad.status === 404, true);
 });
+
+test('guest can read only the status of an order', async () => {
+  const db = { from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { status: 'preparing' }, error: null }) }) }) }) };
+  const ok = await call(createApp({ db }), 'GET', '/api/public/orders/11111111-1111-1111-1111-111111111111');
+  assert.equal(ok.status, 200); assert.deepEqual(ok.j, { status: 'preparing' });
+  const bad = await call(createApp({ db }), 'GET', '/api/public/orders/not-a-uuid');
+  assert.equal(bad.status, 400);
+});

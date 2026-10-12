@@ -56,12 +56,38 @@
     fetch(C.API_BASE + '/api/public/orders', { method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({restaurantSlug:slug, tableNo:table, idempotencyKey:idemKey, items:lines}) })
     .then(function(r){ if(r.status===422) return r.json().then(function(j){ throw j.error; }); if(!r.ok) throw 0; return r.json(); })
-    .then(function(){
-      var ok = el('div','ok'); ok.append(el('h2',null,'Order mil gaya!'), el('p',null,'Waiter confirm karenge, phir kitchen me jayega.'));
-      app.replaceChildren(ok); bar.hidden = true; cart = {};
+    .then(function(res){
+      bar.hidden = true; cart = {};
+      track(res.orderId);
     }).catch(function(e){
       send.disabled = false; update();
       alert(e==='item_unavailable' ? 'Koi item abhi available nahi hai. Page refresh karein.' : 'Order nahi gaya. Internet check karke dobara dabayein.');
     });
   };
+
+  // ---- live order status for the guest (polls the server every few seconds) ----
+  var STAGES = {
+    pending_approval: ['Order mil gaya!', 'Waiter confirm karenge, phir kitchen me jayega.'],
+    approved: ['Kitchen me gaya', 'Aapka order banna shuru hone wala hai.'],
+    preparing: ['Ban raha hai', 'Thoda intezaar karein, garma-garam aa raha hai.'],
+    ready: ['Aa raha hai!', 'Aapka order table par aa raha hai.'],
+    served: ['Enjoy your meal!', 'Dobara order karna ho to page refresh karein.'],
+    cancelled: ['Order cancel hua', 'Kripya waiter se baat karein.']
+  };
+  var pollTimer = null;
+  function track(orderId){
+    var box = el('div','ok'), h = el('h2'), p = el('p');
+    box.append(h,p); app.replaceChildren(box);
+    function show(status){ var s = STAGES[status] || STAGES.pending_approval; h.textContent = s[0]; p.textContent = s[1]; }
+    show('pending_approval');
+    function poll(){
+      fetch(C.API_BASE + '/api/public/orders/' + encodeURIComponent(orderId))
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(j){
+          if(j && j.status){ show(j.status); if(j.status==='served'||j.status==='cancelled') return; }
+          pollTimer = setTimeout(poll, 6000);
+        }).catch(function(){ pollTimer = setTimeout(poll, 10000); });
+    }
+    clearTimeout(pollTimer); pollTimer = setTimeout(poll, 4000);
+  }
 })();

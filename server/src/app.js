@@ -78,6 +78,16 @@ function createApp({ db, allowedOrigins = [] }) {
     res.status(201).json({ orderId: data, status: 'pending_approval' });
   });
 
+  // Guest checks the status of their own order. The id is an unguessable UUID; only the status is returned.
+  app.get('/api/public/orders/:id', async (req, res) => {
+    if (!/^[0-9a-f-]{36}$/i.test(req.params.id)) return res.status(400).json({ error: 'invalid_request' });
+    if (!db) return res.status(503).json({ error: 'server_not_configured' });
+    const { data, error } = await db.from('orders').select('status').eq('id', req.params.id).maybeSingle();
+    if (error) { console.error('status_error', error.code); return res.status(500).json({ error: 'server_error' }); }
+    if (!data) return res.status(404).json({ error: 'not_found' });
+    res.set('Cache-Control', 'no-store').json({ status: data.status });
+  });
+
   app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
   // eslint-disable-next-line no-unused-vars
   app.use((err, _req, res, _next) => {
