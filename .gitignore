@@ -1,0 +1,16 @@
+# secrets - NEVER commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+service-account*.json
+
+# node / flutter
+node_modules/
+build/
+.dart_tool/
+.flutter-plugins*
+*.log
+.DS_Store
+supabase/.temp/
