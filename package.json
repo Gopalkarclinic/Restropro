@@ -1,0 +1,11 @@
+{
+  "name": "restropro",
+  "version": "0.1.0",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "workspaces": ["server"],
+  "scripts": {
+    "start": "node server/src/index.js",
+    "test": "npm test --workspace server"
+  }
+}
